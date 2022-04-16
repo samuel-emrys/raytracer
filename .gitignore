@@ -67,3 +67,6 @@ data/
 
 # Clangd
 .cache/
+
+# Image output
+*.ppm

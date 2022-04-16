@@ -4,7 +4,7 @@ This is a basic ray tracer, developed as an exercise following the [Ray Tracing 
 
 # Output
 
-![](img/output.ppm)
+![](img/output.png)
 
 # Build
 
