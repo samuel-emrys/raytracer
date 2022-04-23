@@ -1,4 +1,5 @@
 #include "utility.h"
+#include "ray.h"
 
 auto clamp(double rX, double rMin, double rMax) -> double {
     if (rX < rMin) {
@@ -24,4 +25,8 @@ auto randomInUnitSphere() -> Vector3d {
         }
         return vRandomPoint;
     }
+};
+auto randomUnitVector() -> Vector3d {
+    auto vRandomVector = randomInUnitSphere();
+    return vRandomVector / vRandomVector.norm();
 };

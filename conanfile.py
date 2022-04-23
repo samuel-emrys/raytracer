@@ -90,6 +90,7 @@ class RaytracingConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.4.0")
+        self.requires("date/3.0.1")
 
     def _configure_cmake(self):
         if self._cmake:

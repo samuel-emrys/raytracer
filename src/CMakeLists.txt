@@ -1,6 +1,10 @@
 # Find external dependencies
 find_package(Eigen3 REQUIRED)
-set(EXTERNAL_LIBS Eigen3::Eigen)
+find_package(date REQUIRED)
+set(EXTERNAL_LIBS
+    Eigen3::Eigen
+    date::date
+    )
 
 set(MAIN ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 

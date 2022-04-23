@@ -17,5 +17,6 @@ auto randomNumber(Type rMin, Type rMax) -> Type { // NOLINT
 auto randomVector() -> Vector3d;
 auto randomVector(double rMin, double rMax) -> Vector3d;
 auto randomInUnitSphere() -> Vector3d;
+auto randomUnitVector() -> Vector3d;
 
 auto clamp(double rX, double rMin, double rMax) -> double;

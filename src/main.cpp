@@ -5,14 +5,23 @@
 #include "hittablelist.h"
 #include "ray.h"
 #include "sphere.h"
+#include "timer.h"
 #include "utility.h"
+#include <chrono>
 #include <iostream>
 #include <memory>
 
-auto rayColor(const Ray& rRay, const Hittable& rWorld) -> Color {
+auto rayColor(const Ray& rRay, const Hittable& rWorld, uint8_t rDepth) -> Color {
     HitRecord vHitRecord;
-    if (rWorld.hit(rRay, 0, gINFINITY, vHitRecord)) {
-        return 0.5 * (vHitRecord.normal + Color(1, 1, 1));
+
+    if (rDepth <= 0) {
+        // Return black if we've exceeded the ray bounce limit
+        return {0, 0, 0};
+    }
+
+    if (rWorld.hit(rRay, 0.001, gINFINITY, vHitRecord)) {
+        Point3d vTarget = vHitRecord.point + vHitRecord.normal + randomUnitVector();
+        return 0.5 * rayColor(Ray(vHitRecord.point, vTarget - vHitRecord.point), rWorld, rDepth-1);
     }
     Vector3d vUnitDirection = rRay.direction() / rRay.direction().norm();
     auto vVectorScalingFactor = 0.5 * (vUnitDirection.y() + 1.0);
@@ -21,12 +30,13 @@ auto rayColor(const Ray& rRay, const Hittable& rWorld) -> Color {
 };
 
 auto main() -> int {
+    Timer<std::chrono::milliseconds> vTimer;
     // Image
-
     const auto vAspectRatio = 16.0 / 9.0;
     const int vImageWidth = 800;
     const int vImageHeight = static_cast<int>(vImageWidth / vAspectRatio);
     const int vSamplesPerPixel = 100;
+    const int vMaxDepth = 5;
 
     // World
     HittableList vWorld;
@@ -54,7 +64,7 @@ auto main() -> int {
                 auto u = (vCol + randomNumber<double>()) / (vImageWidth - 1); // NOLINT
                 auto v = (vRow + randomNumber<double>()) / (vImageHeight - 1); // NOLINT
                 Ray vRay = vCamera.getRay(u, v);
-                vPixelColor += rayColor(vRay, vWorld);
+                vPixelColor += rayColor(vRay, vWorld, vMaxDepth);
             }
             writeColor(std::cout, vPixelColor, vSamplesPerPixel);
         }
