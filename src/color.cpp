@@ -9,7 +9,7 @@ auto writeColor(std::ostream &rOut, Color rPixelColor) -> void {
          << static_cast<int>(255.999 * rPixelColor.z()) << '\n';
 };
 
-auto writeColor(std::ostream &rOut, Color rPixelColor, uint8_t rSamplesPerPixel) -> void {
+auto writeColor(std::ostream &rOut, Color rPixelColor, uint32_t rSamplesPerPixel) -> void {
     auto r = rPixelColor.x(); // NOLINT
     auto g = rPixelColor.y(); // NOLINT
     auto b = rPixelColor.z(); // NOLINT

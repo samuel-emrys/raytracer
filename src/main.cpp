@@ -35,36 +35,79 @@ auto rayColor(const Ray& rRay, const Hittable& rWorld, uint8_t rDepth) -> Color 
          + vVectorScalingFactor * Color(0.5, 0.7, 1.0);
 };
 
+auto randomScene() -> HittableList {
+    HittableList vWorld;
+
+    auto vGroundMaterial = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
+    vWorld.add(std::make_shared<Sphere>(Point3d(0, -1000, 0), 1000, vGroundMaterial));
+
+    for (int vX = -11; vX < 11; vX++) {
+        for (int vY = -11; vY < 11; vY++) {
+            auto vChooseMaterial = randomNumber<double>();
+            Point3d vCenter(vX + 0.9 * randomNumber<double>(),
+                            0.2,
+                            vY + 0.9 * randomNumber<double>());
+
+            if ((vCenter - Point3d(4, 0.2, 0)).norm() > 0.9) {
+                std::shared_ptr<Material> vSphereMaterial;
+
+                if (vChooseMaterial < 0.8) {
+                    // Diffuse
+                    auto vAlbedo = Color(randomVector().cwiseProduct(randomVector()));
+                    vSphereMaterial = std::make_shared<Lambertian>(vAlbedo);
+                    vWorld.add(std::make_shared<Sphere>(vCenter, 0.2, vSphereMaterial));
+                } else if (vChooseMaterial < 0.95) {
+                    // Metal
+                    auto vAlbedo = Color(randomVector(0.5, 1));
+                    auto vFuzz = randomNumber<double>(0, 0.5);
+                    vSphereMaterial = std::make_shared<Metal>(vAlbedo, vFuzz);
+                    vWorld.add(std::make_shared<Sphere>(vCenter, 0.2, vSphereMaterial));
+                } else {
+                    // Glass
+                    vSphereMaterial = std::make_shared<Dialectric>(1.5);
+                    vWorld.add(std::make_shared<Sphere>(vCenter, 0.2, vSphereMaterial));
+                }
+            }
+        }
+    }
+
+    auto vMaterial1 = std::make_shared<Dialectric>(1.5);
+    vWorld.add(std::make_shared<Sphere>(Point3d(0, 1, 0), 1.0, vMaterial1));
+
+    auto vMaterial2 = std::make_shared<Lambertian>(Color(0.4, 0.2, 0.1));
+    vWorld.add(std::make_shared<Sphere>(Point3d(-4, 1, 0), 1.0, vMaterial2));
+
+    auto vMaterial3 = std::make_shared<Metal>(Color(0.7, 0.6, 0.5), 0.0);
+    vWorld.add(std::make_shared<Sphere>(Point3d(4, 1, 0), 1.0, vMaterial3));
+
+    return vWorld;
+};
+
 auto main() -> int {
     Timer<std::chrono::milliseconds> vTimer;
     // Image
     const auto vAspectRatio = 16.0 / 9.0;
-    const int vImageWidth = 800;
+    const int vImageWidth = 1200;
     const int vImageHeight = static_cast<int>(vImageWidth / vAspectRatio);
-    const int vSamplesPerPixel = 100;
-    const int vMaxDepth = 20;
+    const int vSamplesPerPixel = 500;
+    const int vMaxDepth = 50;
 
     // World
-    HittableList vWorld;
-
-    auto vGroundMaterial = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
-    auto vCenterMaterial = std::make_shared<Lambertian>(Color(0.1, 0.2, 0.5));
-    auto vLeftMaterial = std::make_shared<Dialectric>(1.5);
-    auto vRightMaterial = std::make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.0);
-
-    vWorld.add(std::make_shared<Sphere>(Point3d(0.0, -100.5, -1.0), 100.0, vGroundMaterial));
-    vWorld.add(std::make_shared<Sphere>(Point3d(0.0, 0.0, -1.0), 0.5, vCenterMaterial));
-    vWorld.add(std::make_shared<Sphere>(Point3d(-1.0, 0.0, -1.0), 0.5, vLeftMaterial));
-    vWorld.add(std::make_shared<Sphere>(Point3d(-1.0, 0.0, -1.0), -0.45, vLeftMaterial));
-    vWorld.add(std::make_shared<Sphere>(Point3d(1.0, 0.0, -1.0), 0.5, vRightMaterial));
+    HittableList vWorld = randomScene();
 
     // Camera
-    Point3d vLookFrom = {3, 3, 2};
-    Point3d vLookAt = {0, 0, -1};
+    Point3d vLookFrom = {13, 2, 3};
+    Point3d vLookAt = {0, 0, 0};
     Vector3d vViewUp = {0, 1, 0};
-    auto vDistanceToFocus = (vLookFrom - vLookAt).norm();
-    auto vAperture = 1.0/2.0;
-    Camera vCamera(vLookFrom, vLookAt, vViewUp, radians(20.0), vAspectRatio, vAperture, vDistanceToFocus);
+    auto vDistanceToFocus = 10.0;
+    auto vAperture = 0.1;
+    Camera vCamera(vLookFrom,
+                   vLookAt,
+                   vViewUp,
+                   radians(20.0),
+                   vAspectRatio,
+                   vAperture,
+                   vDistanceToFocus);
 
     // Render
 
