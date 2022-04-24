@@ -1,9 +1,13 @@
 #pragma once
 #include "ray.h"
+#include <memory>
+
+class Material;
 
 struct HitRecord {
     Point3d point;
     Vector3d normal;
+    std::shared_ptr<Material> material;
     double rayScalingFactor;
     bool frontFace;
 

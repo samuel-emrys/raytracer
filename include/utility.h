@@ -18,5 +18,8 @@ auto randomVector() -> Vector3d;
 auto randomVector(double rMin, double rMax) -> Vector3d;
 auto randomInUnitSphere() -> Vector3d;
 auto randomUnitVector() -> Vector3d;
+auto randomInUnitDisk() -> Vector3d;
+
+auto vectorNearZero(const Vector3d& rVector) -> bool;
 
 auto clamp(double rX, double rMin, double rMax) -> double;

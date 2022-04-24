@@ -16,3 +16,6 @@ class Ray {
     Point3d mOrigin;
     Vector3d mDirection;
 };
+
+auto reflect(const Vector3d& rRay, const Vector3d& rNormal) -> Vector3d;
+auto refract(const Vector3d& rRay, const Vector3d& rNormal, double rRefractionIndexRatio) -> Vector3d;

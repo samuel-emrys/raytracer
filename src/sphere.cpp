@@ -1,12 +1,17 @@
 #include "sphere.h"
 #include "ray.h"
 
-auto Sphere::hit(const Ray& rRay, double rRayScalingFactorMin, double rRayScalingFactorMax, HitRecord& rHitRecord) const -> bool { // NOLINT
+auto Sphere::hit(const Ray& rRay,
+                 double rRayScalingFactorMin,
+                 double rRayScalingFactorMax,
+                 HitRecord& rHitRecord) const -> bool { // NOLINT
     Vector3d vSphereCenter = rRay.origin() - mCenter;
     // Use quadratic equation to find roots of intersection
-    auto a = std::pow(rRay.direction().norm(), 2.0); // NOLINT [readability-identifier-naming]
+    auto a = std::pow(rRay.direction().norm(), // NOLINT [readability-identifier-naming]
+                      2.0);
     auto vHalfB = vSphereCenter.dot(rRay.direction());
-    auto c = std::pow(vSphereCenter.norm(), 2.0) - std::pow(mRadius, 2.0); // NOLINT [readability-identifier-naming]
+    auto c = std::pow(vSphereCenter.norm(), 2.0) // NOLINT [readability-identifier-naming]
+           - std::pow(mRadius, 2.0);
 
     auto vDiscriminant = std::pow(vHalfB, 2.0) - a * c;
     if (vDiscriminant < 0) {
@@ -26,6 +31,7 @@ auto Sphere::hit(const Ray& rRay, double rRayScalingFactorMin, double rRayScalin
     rHitRecord.point = rRay.at(vRoot);
     Vector3d vOutwardNormal = (rHitRecord.point - mCenter) / mRadius;
     rHitRecord.setFaceNormal(rRay, vOutwardNormal);
+    rHitRecord.material = mMaterial;
 
     return true;
 };
