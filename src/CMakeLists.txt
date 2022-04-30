@@ -1,9 +1,14 @@
 # Find external dependencies
 find_package(Eigen3 REQUIRED)
 find_package(date REQUIRED)
+find_package(gsl-lite REQUIRED COMPONENTS gsl-lite)
+#find_package(TBB REQUIRED COMPONENTS tbb)
+
 set(EXTERNAL_LIBS
     Eigen3::Eigen
     date::date
+    gsl::gsl-lite
+    #    TBB:tbb
     )
 
 set(MAIN ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
@@ -28,7 +33,7 @@ target_include_directories(${PROJECT_LIB} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 set_target_properties(${PROJECT_LIB} PROPERTIES PUBLIC_HEADER "${LIB_HEADERS}")
 target_link_libraries(
   ${PROJECT_LIB}
-  PUBLIC ${EXTERNAL_LIBS}
+  PUBLIC ${EXTERNAL_LIBS} "-latomic"
   PRIVATE project_options project_warnings)
 
 # Create an executable with main, and link our library

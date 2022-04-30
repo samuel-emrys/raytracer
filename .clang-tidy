@@ -34,7 +34,7 @@ CheckOptions:
   - key: readability-identifier-naming.PrivateMemberPrefix
     value: 'm'
   - key: readability-identifier-naming.LocalConstantPointerCase
-    value: 'UPPER_CASE'
+    value: 'CamelCase'
   - key: readability-identifier-naming.LocalConstantPointerPrefix
     value: 'pv'
   - key: readability-identifier-naming.LocalPointerCase

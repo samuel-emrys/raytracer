@@ -5,13 +5,17 @@
 #include "hittable.h"
 #include "hittablelist.h"
 #include "material.h"
+#include "matrix.h"
 #include "ray.h"
 #include "sphere.h"
+#include "threadpool.h"
 #include "timer.h"
 #include "utility.h"
+#include <atomic>
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <thread>
 
 auto rayColor(const Ray& rRay, const Hittable& rWorld, uint8_t rDepth) -> Color {
     HitRecord vHitRecord;
@@ -109,24 +113,54 @@ auto main() -> int {
                    vAperture,
                    vDistanceToFocus);
 
-    // Render
+    // Compute
+    ThreadPool vThreadPool;
+    // 2D vector of pixels to represent the image
+    auto vPixelFutures = Matrix<std::future<Color>>(vImageHeight, vImageWidth);
+    auto vPicture = Matrix<Color>(vImageHeight, vImageWidth);
 
-    std::cout << "P3\n" << vImageWidth << ' ' << vImageHeight << "\n255\n";
+    for (int vRow = vImageHeight - 1; vRow >= 0; --vRow) {
+        for (int vCol = 0; vCol < vImageWidth; ++vCol) {
+            vPixelFutures(vRow, vCol) = vThreadPool.submit([vRow,
+                                                            vCol,
+                                                            vSamplesPerPixel,
+                                                            vImageWidth,
+                                                            vImageHeight,
+                                                            vCamera,
+                                                            vWorld]() -> Color {
+                Color vPixelColor(0, 0, 0);
+                for (int vSample = 0; vSample < vSamplesPerPixel; ++vSample) {
+                    auto u = (static_cast<double>(vCol) + randomNumber<double>()) // NOLINT
+                           / (vImageWidth - 1);
+                    auto v = (static_cast<double>(vRow) + randomNumber<double>()) // NOLINT
+                           / (vImageHeight - 1);
+                    Ray vRay = vCamera.getRay(u, v);
+                    vPixelColor += rayColor(vRay, vWorld, vMaxDepth);
+                }
+                return vPixelColor;
+            });
+        }
+    }
 
+    // Wait for compute to finish
     for (int vRow = vImageHeight - 1; vRow >= 0; --vRow) {
         std::cerr << "\rScanlines remaining: " << vRow << ' ' << std::flush;
         for (int vCol = 0; vCol < vImageWidth; ++vCol) {
-            Color vPixelColor(0, 0, 0);
-            for (int vSample = 0; vSample < vSamplesPerPixel; ++vSample) {
-                auto u = (vCol + randomNumber<double>()) / (vImageWidth - 1);  // NOLINT
-                auto v = (vRow + randomNumber<double>()) / (vImageHeight - 1); // NOLINT
-                Ray vRay = vCamera.getRay(u, v);
-                vPixelColor += rayColor(vRay, vWorld, vMaxDepth);
-            }
-            writeColor(std::cout, vPixelColor, vSamplesPerPixel);
+            vPicture(vRow, vCol) = vPixelFutures(vRow, vCol).get();
+        }
+        std::cerr << std::endl;
+    }
+
+    // Render
+
+    std::cerr << "Rendering Image...\n";
+    std::cout << "P3\n" << vImageWidth << ' ' << vImageHeight << "\n255\n";
+    for (int vRow = vImageHeight - 1; vRow >= 0; --vRow) {
+        for (int vCol = 0; vCol < vImageWidth; ++vCol) {
+            writeColor(std::cout, vPicture(vRow, vCol), vSamplesPerPixel);
         }
     }
-    std::cerr << "\nDone\n";
+    std::cerr << "\nDone." << std::endl;
 
     return EXIT_SUCCESS;
 }

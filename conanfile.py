@@ -91,6 +91,8 @@ class RaytracingConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0")
         self.requires("date/3.0.1")
+        self.requires("gsl-lite/0.39.0")
+        #self.requires("onetbb/2021.3.0")
 
     def _configure_cmake(self):
         if self._cmake:
