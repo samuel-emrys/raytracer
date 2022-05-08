@@ -13,6 +13,9 @@
 #include "utility.h"
 #include <atomic>
 #include <chrono>
+#include <cstdint>
+#include <fmt/core.h>
+#include <future>
 #include <iostream>
 #include <memory>
 #include <thread>
@@ -62,7 +65,7 @@ auto randomScene() -> HittableList {
                     vWorld.add(std::make_shared<Sphere>(vCenter, 0.2, vSphereMaterial));
                 } else if (vChooseMaterial < 0.95) {
                     // Metal
-                    auto vAlbedo = Color(randomVector(0.5, 1));
+                    auto vAlbedo = randomVector(0.5, 1);
                     auto vFuzz = randomNumber<double>(0, 0.5);
                     vSphereMaterial = std::make_shared<Metal>(vAlbedo, vFuzz);
                     vWorld.add(std::make_shared<Sphere>(vCenter, 0.2, vSphereMaterial));
@@ -91,12 +94,13 @@ auto main() -> int {
     Timer<std::chrono::milliseconds> vTimer;
     // Image
     const auto vAspectRatio = 16.0 / 9.0;
-    const int vImageWidth = 1200;
-    const int vImageHeight = static_cast<int>(vImageWidth / vAspectRatio);
-    const int vSamplesPerPixel = 500;
-    const int vMaxDepth = 50;
+    const size_t vImageWidth = 1200;
+    const auto vImageHeight = static_cast<size_t>(vImageWidth / vAspectRatio);
+    const uint64_t vSamplesPerPixel = 500;
+    const uint8_t vMaxDepth = 50;
 
     // World
+    std::cerr << "Generating scene...\n";
     HittableList vWorld = randomScene();
 
     // Camera
@@ -119,22 +123,17 @@ auto main() -> int {
     auto vPixelFutures = Matrix<std::future<Color>>(vImageHeight, vImageWidth);
     auto vPicture = Matrix<Color>(vImageHeight, vImageWidth);
 
-    for (int vRow = vImageHeight - 1; vRow >= 0; --vRow) {
-        for (int vCol = 0; vCol < vImageWidth; ++vCol) {
-            vPixelFutures(vRow, vCol) = vThreadPool.submit([vRow,
-                                                            vCol,
-                                                            vSamplesPerPixel,
-                                                            vImageWidth,
-                                                            vImageHeight,
-                                                            vCamera,
-                                                            vWorld]() -> Color {
+    std::cerr << "Initialising computation...\n";
+    for (size_t vRow = 0; vRow < vImageHeight; ++vRow) {
+        for (size_t vCol = 0; vCol < vImageWidth; ++vCol) {
+            vPixelFutures(vRow, vCol) = vThreadPool.submit([=]() -> Color {
                 Color vPixelColor(0, 0, 0);
-                for (int vSample = 0; vSample < vSamplesPerPixel; ++vSample) {
-                    auto u = (static_cast<double>(vCol) + randomNumber<double>()) // NOLINT
-                           / (vImageWidth - 1);
-                    auto v = (static_cast<double>(vRow) + randomNumber<double>()) // NOLINT
-                           / (vImageHeight - 1);
-                    Ray vRay = vCamera.getRay(u, v);
+                for (size_t vSample = 0; vSample < vSamplesPerPixel; ++vSample) {
+                    auto vU = (static_cast<double>(vCol) + randomNumber<double>())
+                           / static_cast<double>(vImageWidth - 1);
+                    auto vV = (static_cast<double>(vRow) + randomNumber<double>())
+                           / static_cast<double>(vImageHeight - 1);
+                    auto vRay = vCamera.getRay(vU, vV);
                     vPixelColor += rayColor(vRay, vWorld, vMaxDepth);
                 }
                 return vPixelColor;
@@ -143,20 +142,27 @@ auto main() -> int {
     }
 
     // Wait for compute to finish
-    for (int vRow = vImageHeight - 1; vRow >= 0; --vRow) {
-        std::cerr << "\rScanlines remaining: " << vRow << ' ' << std::flush;
-        for (int vCol = 0; vCol < vImageWidth; ++vCol) {
+    for (size_t vRow = 0; vRow < vImageHeight; ++vRow) {
+        std::string vOutput = fmt::format("\rScanlines completed: {}/{}", vRow, vImageHeight-1);
+        std::cerr << vOutput << std::flush;
+        for (size_t vCol = 0; vCol < vImageWidth; ++vCol) {
+            // Run another task if this element isn't ready yet
+            while (vPixelFutures(vRow, vCol).wait_for(std::chrono::seconds(0))
+                   == std::future_status::timeout) {
+                vThreadPool.runPendingTask();
+            }
             vPicture(vRow, vCol) = vPixelFutures(vRow, vCol).get();
         }
-        std::cerr << std::endl;
     }
+    std::cerr << std::endl;
 
     // Render
 
     std::cerr << "Rendering Image...\n";
     std::cout << "P3\n" << vImageWidth << ' ' << vImageHeight << "\n255\n";
-    for (int vRow = vImageHeight - 1; vRow >= 0; --vRow) {
-        for (int vCol = 0; vCol < vImageWidth; ++vCol) {
+    // Iterate in reverse order for ppm format
+    for (size_t vRow = vImageHeight - 1; vRow < vImageHeight; --vRow) {
+        for (size_t vCol = 0; vCol < vImageWidth; ++vCol) {
             writeColor(std::cout, vPicture(vRow, vCol), vSamplesPerPixel);
         }
     }

@@ -2,12 +2,14 @@
 find_package(Eigen3 REQUIRED)
 find_package(date REQUIRED)
 find_package(gsl-lite REQUIRED COMPONENTS gsl-lite)
+find_package(fmt REQUIRED COMPONENTS fmt)
 #find_package(TBB REQUIRED COMPONENTS tbb)
 
 set(EXTERNAL_LIBS
     Eigen3::Eigen
     date::date
     gsl::gsl-lite
+    fmt::fmt
     #    TBB:tbb
     )
 
