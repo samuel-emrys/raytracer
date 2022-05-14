@@ -4,6 +4,7 @@
 #include "conversion.h"
 #include "hittable.h"
 #include "hittablelist.h"
+#include "image.h"
 #include "material.h"
 #include "matrix.h"
 #include "ray.h"
@@ -157,15 +158,9 @@ auto main() -> int {
     std::cerr << std::endl;
 
     // Render
+    std::unique_ptr<Image> vImage = std::make_unique<Ppm>();
+    vImage->render(vPicture, vSamplesPerPixel);
 
-    std::cerr << "Rendering Image...\n";
-    std::cout << "P3\n" << vImageWidth << ' ' << vImageHeight << "\n255\n";
-    // Iterate in reverse order for ppm format
-    for (size_t vRow = vImageHeight - 1; vRow < vImageHeight; --vRow) {
-        for (size_t vCol = 0; vCol < vImageWidth; ++vCol) {
-            writeColor(std::cout, vPicture(vRow, vCol), vSamplesPerPixel);
-        }
-    }
     std::cerr << "\nDone." << std::endl;
 
     return EXIT_SUCCESS;

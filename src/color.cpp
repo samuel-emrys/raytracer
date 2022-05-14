@@ -1,27 +1,23 @@
 #include "color.h"
-#include "ray.h"
-#include "utility.h"
 
-auto writeColor(std::ostream &rOut, Color rPixelColor) -> void {
+auto writeColor(Color rPixelColor) -> std::string {
 
-    rOut << static_cast<int>(255.999 * rPixelColor.x()) << ' '
-         << static_cast<int>(255.999 * rPixelColor.y()) << ' '
-         << static_cast<int>(255.999 * rPixelColor.z()) << '\n';
+    auto vRed = static_cast<int>(255.999 * rPixelColor.x());
+    auto vGreen = static_cast<int>(255.999 * rPixelColor.y());
+    auto vBlue = static_cast<int>(255.999 * rPixelColor.z());
+    return fmt::format("{} {} {}", vRed, vGreen, vBlue);
 };
 
-auto writeColor(std::ostream &rOut, Color rPixelColor, uint32_t rSamplesPerPixel) -> void {
-    auto r = rPixelColor.x(); // NOLINT
-    auto g = rPixelColor.y(); // NOLINT
-    auto b = rPixelColor.z(); // NOLINT
-
+auto writeColor(Color rPixelColor, uint32_t rSamplesPerPixel) -> std::string {
     // Average colour samples
     auto vScale = 1.0 / static_cast<double>(rSamplesPerPixel);
-    r = std::sqrt(vScale * r);
-    g = std::sqrt(vScale * g);
-    b = std::sqrt(vScale * b);
+    auto vRed = std::sqrt(vScale * rPixelColor.x());
+    auto vGreen = std::sqrt(vScale * rPixelColor.y());
+    auto vBlue = std::sqrt(vScale * rPixelColor.z());
 
-    rOut << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
-         << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
-         << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
+    auto vScaledRed = static_cast<int>(256 * clamp(vRed, 0.0, 0.999));
+    auto vScaledGreen = static_cast<int>(256 * clamp(vGreen, 0.0, 0.999));
+    auto vScaledBlue = static_cast<int>(256 * clamp(vBlue, 0.0, 0.999));
+    return fmt::format("{} {} {}", vScaledRed, vScaledGreen, vScaledBlue);
 };
 
