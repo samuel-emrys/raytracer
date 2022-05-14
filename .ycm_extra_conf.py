@@ -44,7 +44,7 @@ def DirectoryOfThisScript():
 # These are the compilation flags that will be used in case there's no
 # compilation database set (by default, one is not set).
 # CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.
-flags = ["-x", "c++", "-Iinclude"]
+flags = ["-x", "c++", "-Iinclude", "--std=c++20"]
 
 conan_flags = json.loads(open("conan_ycm_flags.json", "r").read())
 

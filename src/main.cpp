@@ -15,6 +15,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <filesystem>
 #include <fmt/core.h>
 #include <future>
 #include <iostream>
@@ -158,8 +159,9 @@ auto main() -> int {
     std::cerr << std::endl;
 
     // Render
+    std::filesystem::path vPath("image.ppm");
     std::unique_ptr<Image> vImage = std::make_unique<Ppm>();
-    vImage->render(vPicture, vSamplesPerPixel);
+    vImage->render(vPath, vPicture, vSamplesPerPixel);
 
     std::cerr << "\nDone." << std::endl;
 

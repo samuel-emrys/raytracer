@@ -16,8 +16,10 @@ conan build . -bf build
 # Run the program
 
 ```
-build/build_subfolder/src/raytracing > image.ppm
+./build/build_subfolder/src/raytracing
 ```
+
+This will create the file `image.ppm` in your current working directory.
 
 # Open the image
 
