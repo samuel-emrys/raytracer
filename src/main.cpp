@@ -12,6 +12,9 @@
 #include "threadpool.h"
 #include "timer.h"
 #include "utility.h"
+#include <CLI/App.hpp>
+#include <CLI/Config.hpp>
+#include <CLI/Formatter.hpp>
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -92,14 +95,38 @@ auto randomScene() -> HittableList {
     return vWorld;
 };
 
-auto main() -> int {
+auto main(int argc, char** argv) -> int {
     Timer<std::chrono::milliseconds> vTimer;
-    // Image
-    const auto vAspectRatio = 16.0 / 9.0;
-    const size_t vImageWidth = 1200;
-    const auto vImageHeight = static_cast<size_t>(vImageWidth / vAspectRatio);
-    const uint64_t vSamplesPerPixel = 500;
-    const uint8_t vMaxDepth = 50;
+
+    // Image defaults
+    std::string vOutputFilename = "image.ppm";
+    std::string vFormat = "ppm";
+    auto vAspectRatio = 16.0 / 9.0;
+    size_t vImageWidth = 1200;
+    uint64_t vSamplesPerPixel = 500;
+    uint8_t vMaxDepth = 50;
+    double vVerticalFieldOfView = 20.0;
+
+    // Command line interface
+
+    CLI::App vApplication{"A simple program to generate a static scene of spheres using a raytracer"};
+    vApplication.add_option("-o,--output", vOutputFilename, fmt::format("The name of the file in which to store the output [{}].", vOutputFilename));
+    vApplication.add_option("-f,--format", vFormat, fmt::format("The format of the image to output [{}].", vFormat));
+    vApplication.add_option("-a,--aspect-ratio", vAspectRatio, fmt::format("The aspect ratio of the image [{}].", vAspectRatio));
+    vApplication.add_option("-w,--width", vImageWidth, fmt::format("The width of the image [{}].", vImageWidth));
+    vApplication.add_option("-s,--samples-per-pixel", vSamplesPerPixel, fmt::format("The number of samples to take for each pixel [{}].", vSamplesPerPixel));
+    vApplication.add_option("-d,--max-depth", vMaxDepth, fmt::format("The maxmimum number of ray bounces to compute [{}].", vMaxDepth));
+    vApplication.add_option("-v,--vertical-field-of-view", vVerticalFieldOfView, fmt::format("The vertical field of view with which to view the scene, in degrees [{}].", vVerticalFieldOfView));
+
+    try {
+        vApplication.parse(argc, argv);
+    } catch (const CLI::ParseError &vError) {
+        return vApplication.exit(vError);
+    }
+
+    // Image computations
+
+    const auto vImageHeight = static_cast<size_t>(static_cast<double>(vImageWidth) / vAspectRatio);
 
     // World
     std::cerr << "Generating scene...\n";
@@ -114,7 +141,7 @@ auto main() -> int {
     Camera vCamera(vLookFrom,
                    vLookAt,
                    vViewUp,
-                   radians(20.0),
+                   radians(vVerticalFieldOfView),
                    vAspectRatio,
                    vAperture,
                    vDistanceToFocus);
@@ -159,7 +186,7 @@ auto main() -> int {
     std::cerr << std::endl;
 
     // Render
-    std::filesystem::path vPath("image.ppm");
+    std::filesystem::path vPath(vOutputFilename);
     std::unique_ptr<Image> vImage = std::make_unique<Ppm>();
     vImage->render(vPath, vPicture, vSamplesPerPixel);
 
