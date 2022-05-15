@@ -95,6 +95,7 @@ class RaytracingConan(ConanFile):
         self.requires("fmt/8.1.1")
         self.requires("cli11/2.2.0")
         #self.requires("onetbb/2021.3.0")
+        self.requires("pngpp/0.2.10")
 
     def _configure_cmake(self):
         if self._cmake:

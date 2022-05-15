@@ -4,6 +4,7 @@
 #include "matrix.h"
 #include <filesystem>
 #include <fstream>
+#include <png++/png.hpp>
 
 class Image {
   public:

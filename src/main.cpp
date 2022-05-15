@@ -128,6 +128,24 @@ auto main(int argc, char** argv) -> int {
 
     const auto vImageHeight = static_cast<size_t>(static_cast<double>(vImageWidth) / vAspectRatio);
 
+
+    std::unique_ptr<Image> vImage;
+
+    // Switch image type based on CLI parameter
+    if (vFormat == "ppm") {
+        vImage = std::make_unique<Ppm>();
+    }
+    else if (vFormat == "png") {
+        vImage = std::make_unique<Png>();
+    }
+    else if (vFormat == "jpeg" || vFormat == "jpg") {
+        vImage = std::make_unique<Jpeg>();
+    }
+    else {
+        std::cerr << "Image format not recognised. Defaulting to ppm." << std::endl;
+        vImage = std::make_unique<Ppm>();
+    }
+
     // World
     std::cerr << "Generating scene...\n";
     HittableList vWorld = randomScene();
@@ -187,7 +205,6 @@ auto main(int argc, char** argv) -> int {
 
     // Render
     std::filesystem::path vPath(vOutputFilename);
-    std::unique_ptr<Image> vImage = std::make_unique<Ppm>();
     vImage->render(vPath, vPicture, vSamplesPerPixel);
 
     std::cerr << "\nDone." << std::endl;
