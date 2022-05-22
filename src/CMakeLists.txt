@@ -6,6 +6,7 @@ find_package(fmt REQUIRED COMPONENTS fmt)
 find_package(CLI11 REQUIRED COMPONENTS CLI11)
 find_package(pngpp REQUIRED COMPONENTS pngpp)
 #find_package(TBB REQUIRED COMPONENTS tbb)
+find_package(JPEG REQUIRED COMPONENTS JPEG)
 
 set(EXTERNAL_LIBS
     Eigen3::Eigen
@@ -15,7 +16,8 @@ set(EXTERNAL_LIBS
     CLI11::CLI11
     pngpp::pngpp
     #    TBB:tbb
-    )
+    JPEG::JPEG
+)
 
 set(MAIN ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
@@ -39,12 +41,12 @@ target_include_directories(${PROJECT_LIB} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 set_target_properties(${PROJECT_LIB} PROPERTIES PUBLIC_HEADER "${LIB_HEADERS}")
 target_link_libraries(
   ${PROJECT_LIB}
-  PUBLIC ${EXTERNAL_LIBS} "-latomic"
-  PRIVATE project_options project_warnings)
+  PUBLIC ${EXTERNAL_LIBS}
+  PRIVATE atomic project_options project_warnings)
 
 # Create an executable with main, and link our library
 add_executable(${PROJECT_EXE} ${MAIN})
-target_link_libraries(${PROJECT_EXE} PRIVATE project_options project_warnings ${PROJECT_LIB})
+target_link_libraries(${PROJECT_EXE} PRIVATE atomic project_options project_warnings ${PROJECT_LIB})
 
 # Rename the output executable to be ${PROJECT} instead of ${PROJECT_EXE}
 set_target_properties(${PROJECT_EXE} PROPERTIES OUTPUT_NAME ${PROJECT})
@@ -56,4 +58,3 @@ install(
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-

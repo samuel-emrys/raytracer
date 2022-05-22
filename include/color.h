@@ -8,6 +8,6 @@
 using Color = Eigen::Vector3d;
 
 auto writeColor(Color rPixelColor) -> std::string;
-auto writeColor(Color rPixelColor, uint32_t rSamplesPerPixel) -> std::string;
+auto writeColor(Color rPixelColor, size_t rSamplesPerPixel) -> std::string;
 auto getRGB(Color rPixelColor) -> Color;
-auto getRGB(Color rPixelColor, uint32_t rSamplesPerPixel) -> Color;
+auto getRGB(Color rPixelColor, size_t rSamplesPerPixel) -> Color;

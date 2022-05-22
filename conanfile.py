@@ -89,6 +89,7 @@ class RaytracingConan(ConanFile):
             self.tool_requires("doxygen/1.9.2")
 
     def requirements(self):
+        self.requires("libjpeg/9d")
         self.requires("eigen/3.4.0")
         self.requires("date/3.0.1")
         self.requires("gsl-lite/0.39.0")

@@ -4,6 +4,8 @@
 #include "matrix.h"
 #include <filesystem>
 #include <fstream>
+#include <gsl/gsl-lite.hpp>
+#include <jpeglib.h>
 #include <png++/png.hpp>
 
 class Image {

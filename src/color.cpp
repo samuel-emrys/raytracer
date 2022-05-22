@@ -8,7 +8,7 @@ auto writeColor(Color rPixelColor) -> std::string {
     return fmt::format("{} {} {}", vRed, vGreen, vBlue);
 };
 
-auto writeColor(Color rPixelColor, uint32_t rSamplesPerPixel) -> std::string {
+auto writeColor(Color rPixelColor, size_t rSamplesPerPixel) -> std::string {
     // Average colour samples
     auto vScale = 1.0 / static_cast<double>(rSamplesPerPixel);
     auto vRed = std::sqrt(vScale * rPixelColor.x());
@@ -28,7 +28,7 @@ auto getRGB(Color rPixelColor) -> Color {
     return {vRed, vGreen, vBlue};
 };
 
-auto getRGB(Color rPixelColor, uint32_t rSamplesPerPixel) -> Color {
+auto getRGB(Color rPixelColor, size_t rSamplesPerPixel) -> Color {
     // Average colour samples
     auto vScale = 1.0 / static_cast<double>(rSamplesPerPixel);
     auto vRed = std::sqrt(vScale * rPixelColor.x());
