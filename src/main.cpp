@@ -26,25 +26,42 @@
 #include <thread>
 
 auto rayColor(const Ray& rRay, const Hittable& rWorld, uint8_t rDepth) -> Color {
-    HitRecord vHitRecord;
 
-    if (rDepth <= 0) {
-        // Return black if we've exceeded the ray bounce limit
-        return {0, 0, 0};
-    }
+    Color vAttenuation{1.0, 1.0, 1.0};
+    Ray vRay = rRay;
+    auto vDone = false;
 
-    if (rWorld.hit(rRay, 0.001, gINFINITY, vHitRecord)) {
-        Ray vScatteredRay;
-        Color vAttenuation;
-        if (vHitRecord.material->scatter(rRay, vHitRecord, vAttenuation, vScatteredRay)) {
-            return vAttenuation.cwiseProduct(rayColor(vScatteredRay, rWorld, rDepth - 1));
+    for (uint8_t vBounce = 0; vBounce < rDepth; ++vBounce) {
+        HitRecord vHitRecord;
+        Color vRayColor;
+        if (rWorld.hit(vRay, 0.001, gINFINITY, vHitRecord)) {
+            Ray vScatteredRay;
+            if (vHitRecord.material->scatter(vRay, vHitRecord, vRayColor, vScatteredRay)) {
+                // The scattered ray is the next ray to process, so stage it
+                vRay = vScatteredRay;
+            }
+            else {
+                // Ray is black when it doesn't scatter - no light reflected
+                vRayColor = {0, 0, 0};
+            }
         }
-        return {0, 0, 0};
+        else {
+            // We're done processing this ray when it no longer intersects with any elements
+            // in the world, or the depth limit is reached. Whichever comes first.
+            // This condition deals with the former.
+            Vector3d vUnitDirection = vRay.direction().normalized();
+            auto vVectorScalingFactor = 0.5 * (vUnitDirection.y() + 1.0);
+            vRayColor = (1.0 - vVectorScalingFactor) * Color(1.0, 1.0, 1.0)
+                 + vVectorScalingFactor * Color(0.5, 0.7, 1.0);
+            vDone = true;
+        }
+        vAttenuation = vAttenuation.cwiseProduct(vRayColor);
+        if (vDone) {
+            return vAttenuation;
+        }
     }
-    Vector3d vUnitDirection = rRay.direction().normalized();
-    auto vVectorScalingFactor = 0.5 * (vUnitDirection.y() + 1.0);
-    return (1.0 - vVectorScalingFactor) * Color(1.0, 1.0, 1.0)
-         + vVectorScalingFactor * Color(0.5, 0.7, 1.0);
+    // Return black if we've exceeded the ray bounce limit
+    return {0, 0, 0};
 };
 
 auto randomScene() -> HittableList {

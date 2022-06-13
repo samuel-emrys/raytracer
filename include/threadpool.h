@@ -62,8 +62,8 @@ class ThreadPool {
      */
     template <typename FunctionType>
     auto submit(FunctionType rFunction)
-        -> std::future<typename std::result_of<FunctionType()>::type> {
-        using ResultType = typename std::result_of<FunctionType()>::type;
+        -> std::future<typename std::invoke_result<FunctionType>::type> {
+        using ResultType = typename std::invoke_result<FunctionType>::type;
         // Wrap rFunction in a std::packaged_task<> so that we can store and access a std::future
         // vTask takes no input parameters
         std::packaged_task<ResultType()> vTask(std::move(rFunction));

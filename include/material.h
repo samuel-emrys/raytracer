@@ -60,7 +60,7 @@ class Dialectric : public Material {
 
   private:
 
-    auto reflectance(double rCosTheta, double rRefractionIndex) const -> double;
+    [[nodiscard]] auto reflectance(double rCosTheta, double rRefractionIndex) const -> double;
     double mRefractionIndex;
 
 };

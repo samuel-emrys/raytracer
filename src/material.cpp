@@ -3,7 +3,7 @@
 #include "ray.h"
 #include "utility.h"
 
-auto Lambertian::scatter(const Ray& rInputRay,
+auto Lambertian::scatter(const Ray& /*rInputRay*/, // Unused param
                          const HitRecord& rHitRecord,
                          Color& rAttenuation,
                          Ray& rScatteredRay) const -> bool {

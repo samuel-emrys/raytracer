@@ -80,8 +80,7 @@ auto Jpeg::render(std::filesystem::path rPath,
 
     JSAMPROW pvRowPointer = nullptr;
     while (vCInfo.next_scanline < vCInfo.image_height) {
-        pvRowPointer
-            = static_cast<JSAMPROW>(&vImageBuffer[vCInfo.next_scanline * vRowStride]);
+        pvRowPointer = &vImageBuffer[vCInfo.next_scanline * vRowStride];
         jpeg_write_scanlines(&vCInfo, &pvRowPointer, 1);
     }
 

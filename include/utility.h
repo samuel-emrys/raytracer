@@ -1,12 +1,19 @@
 #pragma once
 #include "ray.h"
+#include <memory>
 #include <random>
+#include <thread>
 
 template <typename Type>
-auto randomNumber() -> Type { // NOLINT
+auto randomNumber() -> Type {
     static std::uniform_real_distribution<Type> sDistribution(static_cast<Type>(0), static_cast<Type>(1));
-    static std::mt19937 sGenerator;
-    return static_cast<Type>(sDistribution(sGenerator));
+    static thread_local std::unique_ptr<std::mt19937> sGenerator;
+
+    if (!sGenerator) {
+        std::hash<std::thread::id> vHasher;
+        sGenerator = std::make_unique<std::mt19937>(vHasher(std::this_thread::get_id()));
+    }
+    return static_cast<Type>(sDistribution(*sGenerator));
 };
 
 template <typename Type>

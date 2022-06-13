@@ -1,7 +1,7 @@
 #include "color.h"
+#include <cstdint>
 
 auto writeColor(Color rPixelColor) -> std::string {
-
     auto vRed = static_cast<uint8_t>(255.999 * rPixelColor.x());
     auto vGreen = static_cast<uint8_t>(255.999 * rPixelColor.y());
     auto vBlue = static_cast<uint8_t>(255.999 * rPixelColor.z());
@@ -25,7 +25,9 @@ auto getRGB(Color rPixelColor) -> Color {
     auto vRed = static_cast<uint8_t>(255.999 * rPixelColor.x());
     auto vGreen = static_cast<uint8_t>(255.999 * rPixelColor.y());
     auto vBlue = static_cast<uint8_t>(255.999 * rPixelColor.z());
-    return {vRed, vGreen, vBlue};
+    return {static_cast<double>(vRed),
+            static_cast<double>(vGreen),
+            static_cast<double>(vBlue)};
 };
 
 auto getRGB(Color rPixelColor, size_t rSamplesPerPixel) -> Color {
@@ -35,8 +37,10 @@ auto getRGB(Color rPixelColor, size_t rSamplesPerPixel) -> Color {
     auto vGreen = std::sqrt(vScale * rPixelColor.y());
     auto vBlue = std::sqrt(vScale * rPixelColor.z());
 
-    auto vScaledRed = static_cast<int>(256 * clamp(vRed, 0.0, 0.999));
-    auto vScaledGreen = static_cast<int>(256 * clamp(vGreen, 0.0, 0.999));
-    auto vScaledBlue = static_cast<int>(256 * clamp(vBlue, 0.0, 0.999));
-    return {vScaledRed, vScaledGreen, vScaledBlue};
+    auto vScaledRed = static_cast<uint8_t>(256 * clamp(vRed, 0.0, 0.999));
+    auto vScaledGreen = static_cast<uint8_t>(256 * clamp(vGreen, 0.0, 0.999));
+    auto vScaledBlue = static_cast<uint8_t>(256 * clamp(vBlue, 0.0, 0.999));
+    return {static_cast<double>(vScaledRed),
+            static_cast<double>(vScaledGreen),
+            static_cast<double>(vScaledBlue)};
 };
