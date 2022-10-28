@@ -33,7 +33,7 @@ class RaytracingConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_docs": False,
-        "with_tests": True,
+        "with_tests": False,
         "with_coverage": True,
         "with_clang_tidy": False,
         "with_cppcheck": False,
